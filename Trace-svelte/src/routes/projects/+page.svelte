@@ -42,9 +42,22 @@
     });
   
     // Action handlers (stubbed with alerts)
-    function runScan(projectId) {
-      alert(`Run Scan clicked for project ID: ${projectId}`);
-      // In real usage, call your backend endpoint
+    async function runScan(projectId) {
+      try {
+        const response = await fetch("http://127.0.0.1:8000/analysts/execute_scan", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ analyst_id: 1, project_id: projectId })  // Hardcoded analyst_id=1 for now
+        });
+
+        if (!response.ok) throw new Error("Scan failed");
+
+        const data = await response.json();
+        alert(`Scan started! ID: ${data.scan_id}`);
+      } catch (error) {
+        console.error("Error starting scan:", error);
+        alert("Failed to start scan.");
+      }
     }
   
     function lockProject(projectId) {
@@ -64,6 +77,21 @@
       alert('Create New Project button clicked!');
       // Later, open a modal or redirect to a project creation form
     }
+
+    let scanResults = {};
+
+    async function viewScanResults() {
+        try {
+            const response = await fetch("http://127.0.0.1:8000/analysts/1/results/");
+            if (!response.ok) throw new Error("Failed to fetch scan results");
+
+            scanResults = await response.json();
+        } catch (error) {
+            console.error("Error fetching scan results:", error);
+            alert("Failed to retrieve scan results.");
+        }
+    }
+
   </script>
   
   <main class="page-container">
@@ -106,6 +134,20 @@
       </section>
   
       <!-- All Projects Section -->
+
+      <section class="scan-results">
+        <h2>Scan Results</h2>
+        <button on:click={viewScanResults}>View Scan Results</button>
+
+        {#if Object.keys(scanResults).length > 0}
+          <ul>
+            {#each Object.entries(scanResults) as [scanId, result]}
+              <li><strong>Scan {scanId}:</strong> {result}</li>
+            {/each}
+          </ul>
+        {/if}
+      </section>
+
       <section class="all-projects">
         <h2>All Projects</h2>
         <table>

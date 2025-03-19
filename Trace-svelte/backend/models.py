@@ -13,6 +13,7 @@ class Analyst(BaseModel):
     name: str
     assigned_projects: List[int] = []
     assigned_tasks: List[int] = []
+    active_scans: List[int] = []
 
 class LeadAnalyst(Analyst):
     # Inherits all fields from Analyst; additional Lead Analyst methods will be implemented in the endpoints.
