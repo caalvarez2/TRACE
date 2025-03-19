@@ -48,6 +48,12 @@ Install dependencies
 ```bash
   npm install svelte
 ```
+```bash
+  npm install vite
+```
+```bash
+  pip install uvicorn
+```
 
 Start the server
 ```bash
