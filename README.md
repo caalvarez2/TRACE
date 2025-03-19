@@ -57,8 +57,8 @@ Install dependencies
 
 Start the server
 ```bash
-  Inside backend folder, uvicorn main:app --reload
+  Inside backend folder run: uvicorn main:app --reload
 ```
 ```bash
-  Inside the Trace-svelte, run npm run dev
+  Inside the Trace-svelte run: npm run dev
 ```
