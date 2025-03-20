@@ -15,9 +15,24 @@ class Analyst(BaseModel):
     assigned_tasks: List[int] = []
     active_scans: List[int] = []
 
-class LeadAnalyst(Analyst):
-    # Inherits all fields from Analyst; additional Lead Analyst methods will be implemented in the endpoints.
-    pass
+class LeadAnalyst(Analyst): # extends Analyst 
+    managed_projects: List[int] = []  
+    managed_analysts: List[int] = []  
+
+    def assign_analyst(self, project: "Project", analyst: "Analyst") -> bool:
+        if project.id in self.managed_projects:  
+            if project.id not in analyst.assigned_projects:
+                analyst.assigned_projects.append(project.id)
+                return True  # success
+        return False  # project is not managed or analyst is already assigned
+
+    def reassign_task(self, task: "Task", from_analyst: "Analyst", to_analyst: "Analyst") -> bool:
+        if task.id in from_analyst.assigned_tasks:
+            from_analyst.assigned_tasks.remove(task.id)
+            to_analyst.assigned_tasks.append(task.id)
+            return True  # success
+        return False  # task not found in from_analyst list
+
 
 class Project(BaseModel):
     id: int
