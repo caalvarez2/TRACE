@@ -15,7 +15,30 @@ tree_data = TreeNode(
     ]
 )
 
-@router.get("/", response_model=TreeNode)
-async def get_tree():
-    # Stub: In a real application, query the database or processing output.
-    return tree_data
+@router.post("/run-crawler")
+def run_crawler():
+    """
+    Runs driver.py in a subprocess. Returns stdout/stderr in JSON format.
+    """
+    try:
+        # Adjust command/path if needed (e.g., "python3" vs. "python").
+        # Also ensure 'driver.py' is in the same directory or provide a full path.
+        result = subprocess.run(
+            ["python", "driver.py"], 
+            capture_output=True, 
+            text=True, 
+            check=True
+        )
+        return {
+            "success": True,
+            "stdout": result.stdout,
+            "stderr": result.stderr
+        }
+    except subprocess.CalledProcessError as e:
+        # If driver.py fails (non-zero exit code), capture details
+        return {
+            "success": False,
+            "error": str(e),
+            "stdout": e.stdout,
+            "stderr": e.stderr
+        }

@@ -15,7 +15,7 @@
   
     // Example projects data (in real usage, you'd fetch from your backend)
     let projects = [
-      { id: 1, name: 'Project Alpha' },
+      { id: 1, name: 'Project Crawler' },
       { id: 2, name: 'Project Beta' }
     ];
   
@@ -43,7 +43,8 @@
   
     // Action handlers (stubbed with alerts)
     function runScan(projectId) {
-      alert(`Run Scan clicked for project ID: ${projectId}`);
+      //alert(`Run Scan clicked for project ID: ${projectId}`);
+      goto(`/runTools?role=${role}`);
       // In real usage, call your backend endpoint
     }
   
