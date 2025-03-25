@@ -2,7 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import analysts, lead_analysts, role_manager, webtree, tools
 
+
 app = FastAPI()
+
 
 # Allow CORS for frontend development (adjust for production)
 app.add_middleware(
@@ -22,6 +24,6 @@ app.include_router(webtree.router, prefix="/webtree", tags=["webtree"])
 app.include_router(tools.router, prefix="/tools", tags=["tools"])
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":   
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
