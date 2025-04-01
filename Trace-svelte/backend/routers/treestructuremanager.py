@@ -3,17 +3,7 @@ from urllib.parse import urlparse
 
 class TreeStructureManager:
     def __init__(self):
-        """
-        Initializes the tree structure and hardcodes some sample URLs for demonstration.
-        @ensures(self.tree_structure is not None)
-        """
-        self.tree_structure = {}
-        # Hardcode sample URLs for demonstration
-        self.add_url("http://192.168.1.25:8080/quests/success-stories")
-        self.add_url("http://192.168.1.25:8080/quests/shareform")
-        self.add_url("http://192.168.1.25:8080/login/app")
-        self.add_url("http://192.168.1.25:8080/intro/settings/premium")
-        self.add_url("https://discord.com")
+     self.tree_structure = {}
 
     def initialize(self):
         """
