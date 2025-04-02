@@ -1,4 +1,7 @@
 <script lang="ts">
+import { responseStore } from '$lib/stores/responseStore.js';
+import { goto } from '$app/navigation';
+
   // Adjust the API base URL if necessary
   const API_BASE_URL = 'http://localhost:8000';
 
@@ -64,6 +67,23 @@
     } catch (error) {
       console.error('Network or fetch error:', error);
       alert('Failed to run brute forcer. Check console for error details.');
+    }
+  }
+
+  async function runHttpTester() {
+  try {
+    const response = await fetch('https://httpbin.org/get');
+    const data = await response.json();
+    console.log('HTTP Tester Response:', data);
+    
+    // Update the response store with the fetched data
+    responseStore.set(data);
+    
+    // Redirect to the Response Manager page (assumes route is '/response-manager')
+    goto('/response-manager');
+    } catch (error) {
+    console.error('Error executing HTTP Tester:', error);
+    alert('Error executing HTTP Tester.');
     }
   }
 </script>
@@ -206,7 +226,7 @@
     </div>
     <div class="tool-right">
       <button>Info</button>
-      <button>Set Up</button>
+      <button on:click={runHttpTester}>Set Up</button>
     </div>
   </div>
 
