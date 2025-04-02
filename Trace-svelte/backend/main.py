@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import analysts, lead_analysts, role_manager, webtree, tools
+from routers import analysts, lead_analysts, role_manager, webtree, tools, request_manager
 
 
 app = FastAPI()
@@ -22,6 +22,8 @@ app.include_router(role_manager.router, prefix="/role_manager", tags=["role_mana
 app.include_router(webtree.router, prefix="/webtree", tags=["webtree"])
 # Include the new tools router
 app.include_router(tools.router, prefix="/tools", tags=["tools"])
+# Include the new request manager router
+app.include_router(request_manager.router, prefix="/request_manager", tags=["request_manager"])
 
 
 if __name__ == "__main__":   

@@ -50,3 +50,12 @@ class TreeNode(BaseModel):
     children: Optional[List["TreeNode"]] = []
 
 TreeNode.update_forward_refs()
+
+# Model for building/modifying HTTP requests
+class RequestModel(BaseModel):
+    id: int
+    url: Optional[str] = None
+    method: str = "GET"
+    headers: dict = {}
+    parameters: dict = {}
+    payload: dict = {}
