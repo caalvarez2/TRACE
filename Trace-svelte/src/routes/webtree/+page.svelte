@@ -1,36 +1,77 @@
 <script>
-    import { onMount } from 'svelte';
-    import TreeGraph from '$lib/TreeGraph.svelte'; // Path to your D3 tree component or recursive component
-  
-    let treeData = [];
-    let loading = true;
-    let error = null;
-  
-    onMount(async () => {
-      console.log("Starting to fetch tree data...");
-      try {
-        const res = await fetch('http://localhost:8000/webtree/');
-        console.log("Fetch response:", res);
-        if (!res.ok) {
-          throw new Error(`HTTP error: ${res.status}`);
-        }
-        treeData = await res.json();
-        console.log("Fetched tree data:", treeData);
-      } catch (err) {
-        error = err.message;
-        console.error("Error fetching tree data:", err);
-      } finally {
-        loading = false;
-        console.log("Loading complete. treeData:", treeData);
+  import { page } from '$app/stores';
+  import { onMount } from 'svelte';
+  import TreeGraph from '$lib/TreeGraph.svelte';
+
+  let treeData = null;
+  let loading = true;
+  let error = null;
+
+  $: projectId = $page.url.searchParams.get('projectId');
+
+  onMount(async () => {
+    try {
+      const res = await fetch(`http://localhost:8000/webtree/?projectId=${projectId}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const result = await res.json();
+
+      console.log("Crawler response:", result);
+
+      if (Array.isArray(result)) {
+        treeData = {
+          name: 'ROOT',
+          children: result
+        };
+      } else {
+        treeData = null;
       }
-    });
-  </script>
-  
+
+      console.log("Final treeData:", treeData);
+    } catch (err) {
+      error = err.message;
+    } finally {
+      loading = false;
+    }
+  });
+</script>
+
+<style>
+  .webtree-container {
+    padding: 2rem;
+    max-width: 100%;
+    min-height: 100vh;
+    background-color: #f9fafb;
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  h1 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #1f2937;
+    text-align: center;
+  }
+
+  .status-message {
+    text-align: center;
+    color: #6b7280;
+    font-size: 1.2rem;
+  }
+
+  .error {
+    color: red;
+  }
+</style>
+
+<div class="webtree-container">
+  <h1>WebTree</h1>
+
   {#if loading}
-    <p>Loading tree data...</p>
+    <p class="status-message">Loading tree data...</p>
   {:else if error}
-    <p style="color:red">Error: {error}</p>
-  {:else}
+    <p class="status-message error">Error: {error}</p>
+  {:else if treeData && Array.isArray(treeData.children) && treeData.children.length > 0}
     <TreeGraph data={treeData} />
+  {:else}
+    <p class="status-message">No tree data to display.</p>
   {/if}
-  
+</div>

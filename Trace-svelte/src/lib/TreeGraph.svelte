@@ -1,107 +1,119 @@
 <script>
   import { onMount } from 'svelte';
-  import { select, hierarchy, tree, linkVertical } from 'd3';
+  import { select, hierarchy, tree, linkVertical, zoom } from 'd3';
 
-  // Expects "data" to be an array of top-level items:
-  // [
-  //   {
-  //     name: '192.168.1.25:8080',
-  //     children: [
-  //       { name: '/quests/success-stories', children: [...] },
-  //       { name: '/quests/shareform', children: [...] }
-  //     ]
-  //   },
-  //   {
-  //     name: 'discord.com',
-  //     children: []
-  //   }
-  // ]
-  export let data = [];
+  export let data;
+  let container;
+  let width = 900;
+  let height = 600;
 
-  let width = 800;
-  let height = 500;
-  let container; // Bind the <div> to this variable
-
-  
   onMount(() => {
-    // 1) Wrap the user data in a fake root (for multiple top-level nodes)
-    const fakeRoot = { name: 'ROOT', children: data };
+    if (!data || !Array.isArray(data.children) || data.children.length === 0) {
+      console.warn('Empty tree passed to TreeGraph:', data);
+      return;
+    }
 
-    // 2) Build a D3 hierarchy
-    const root = hierarchy(fakeRoot);
+    console.log("Rendering tree with data:", data);
 
-    // 3) Create a tree layout with size [width, height]
-    //    For top-to-bottom, x is horizontal and y is vertical.
+    const root = hierarchy(data);
     const layout = tree().size([width, height - 100]);
     layout(root);
 
-    // 4) Append an <svg> into the container
     const svg = select(container)
       .append('svg')
       .attr('width', width)
       .attr('height', height);
 
-    // 5) Draw the links (paths) using linkVertical
-    svg.selectAll('.link')
+    const g = svg.append('g');
+
+    svg.call(
+      zoom().on('zoom', (event) => {
+        g.attr('transform', event.transform);
+      })
+    );
+
+    // Links
+    g.selectAll('.link')
       .data(root.links())
       .enter()
       .append('path')
       .attr('class', 'link')
-      .attr('d', linkVertical()
-        .x(d => d.x)
-        .y(d => d.y)
-      );
+      .attr('d', linkVertical().x(d => d.x).y(d => d.y));
 
-    // 6) Draw the nodes
-    const node = svg.selectAll('.node')
+    // Nodes
+    const node = g.selectAll('.node')
       .data(root.descendants())
       .enter()
       .append('g')
       .attr('class', 'node')
-      // Position each node at (d.x, d.y)
       .attr('transform', d => `translate(${d.x},${d.y})`);
 
-    // 7) For each node, draw a rectangle (light gray, no border)
+    // Node background (severity colored)
     node.append('rect')
-      .attr('width', 120)
+      .attr('width', 150)
       .attr('height', 60)
-      .attr('x', -60)  // center horizontally
-      .attr('y', -15)  // center vertically
-      .attr('rx', 5)   // rounded corners
-      .attr('ry', 5)
-      .attr('fill', '#d3d3d3') // light gray fill
-      .attr('stroke', 'none'); // no border
+      .attr('x', -75)
+      .attr('y', -30)
+      .attr('rx', 10)
+      .attr('ry', 10)
+      .attr('fill', d => {
+        const sev = d.data.severity;
+        if (sev === 'high') return '#fee2e2';     // light red
+        if (sev === 'medium') return '#fef9c3';   // light yellow
+        if (sev === 'low') return '#d1fae5';      // light green
+        return '#f3f4f6';                         // default light gray
+      });
 
-    // 8) For each node, add text
+    // Node title
     node.append('text')
-      .attr('dy', '0.35em')
+      .attr('dy', '-0.3em')
       .attr('text-anchor', 'middle')
-      .text(d => d.data.name);
+      .text(d => d.data.name)
+      .style('font-weight', '600');
+
+    // Severity label
+    node.append('text')
+      .attr('dy', '1.1em')
+      .attr('text-anchor', 'middle')
+      .style('font-size', '12px')
+      .style('fill', '#6b7280')
+      .text(d => {
+        const sev = d.data.severity;
+        return sev ? sev.charAt(0).toUpperCase() + sev.slice(1) : '';
+      });
   });
 </script>
 
-<!-- The tree graph will render inside this container -->
-<div bind:this={container} />
+<div bind:this={container}></div>
 
 <style>
-  /* Style the links connecting nodes */
+  div {
+    overflow: auto;
+    padding: 1rem;
+  }
+
+  :global(svg) {
+    background-color: white;
+    border-radius: 1rem;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+    max-width: 100%;
+  }
+
   :global(.link) {
     fill: none;
-    stroke: #4ea8b2;
+    stroke: #60a5fa;
     stroke-width: 2;
   }
 
-
-  /* Style for node text */
-  :global(.node text) {
-    font-size: 14px;
-    font-weight: bold;
-    fill: #333;
-    text-anchor: middle;
+  :global(.node rect) {
+    stroke: #cbd5e1;
+    stroke-width: 1;
+    filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.1));
   }
 
-  /* Optional container spacing */
-  div {
-    margin: 1rem 0;
+  :global(.node text) {
+    font-family: 'Segoe UI', sans-serif;
+    pointer-events: none;
+    fill: #111827;
   }
 </style>
