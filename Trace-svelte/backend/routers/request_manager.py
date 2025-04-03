@@ -1,3 +1,4 @@
+# request_manager.py
 from fastapi import APIRouter, HTTPException
 from models import RequestModel
 
@@ -47,3 +48,27 @@ async def update_payload(request_id: int, payload: dict):
         raise HTTPException(status_code=404, detail="Request not found")
     request_store[request_id].payload = payload
     return {"message": "Payload updated", "payload": payload}
+
+# New endpoint: Send the stored request using the HTTPClient
+@router.post("/send/{request_id}")
+async def send_stored_request(request_id: int):
+    if request_id not in request_store:
+        raise HTTPException(status_code=404, detail="Request not found")
+    request_model = request_store[request_id]
+    
+    # Import the necessary HTTP client classes from Tools.py.
+    # Adjust the import path if your Tools.py is located elsewhere.
+    from routers.tools import HTTPClient, RequestManager as ToolsRequestManager, ProxyServer
+
+    client = HTTPClient(ToolsRequestManager(), ProxyServer())
+    try:
+        client.send_request_from_model(request_model)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+    response = client.receive_response()
+    return {
+        "status": response.status_code,
+        "headers": response.headers,
+        "body": response.body
+    }
