@@ -1,5 +1,6 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Any, Dict
+
 
 # User and Role models
 class User(BaseModel):
@@ -51,11 +52,11 @@ class TreeNode(BaseModel):
 
 TreeNode.update_forward_refs()
 
-# Model for building/modifying HTTP requests
 class RequestModel(BaseModel):
     id: int
-    url: Optional[str] = None
+    url: str
     method: str = "GET"
-    headers: dict = {}
-    parameters: dict = {}
-    payload: dict = {}
+    headers: Dict[str, str] = {}
+    parameters: Dict[str, str] = {}
+    payload: Any = None
+

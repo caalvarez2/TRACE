@@ -80,7 +80,7 @@ import { goto } from '$app/navigation';
     responseStore.set(data);
     
     // Redirect to the Response Manager page (assumes route is '/response-manager')
-    goto('/response-manager');
+    goto('/HTTPRequests');
     } catch (error) {
     console.error('Error executing HTTP Tester:', error);
     alert('Error executing HTTP Tester.');

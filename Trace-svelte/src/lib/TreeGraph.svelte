@@ -58,10 +58,10 @@
       .attr('ry', 10)
       .attr('fill', d => {
         const sev = d.data.severity;
-        if (sev === 'high') return '#fee2e2';     // light red
-        if (sev === 'medium') return '#fef9c3';   // light yellow
-        if (sev === 'low') return '#d1fae5';      // light green
-        return '#f3f4f6';                         // default light gray
+        if (sev === 'high') return '#fee2e2';
+        if (sev === 'medium') return '#fef9c3';
+        if (sev === 'low') return '#d1fae5';
+        return '#f3f4f6';
       });
 
     // Node title
@@ -88,6 +88,10 @@
 
 <style>
   div {
+    /* Center the tree graph */
+    display: flex;
+    justify-content: center;
+    align-items: center;
     overflow: auto;
     padding: 1rem;
   }
