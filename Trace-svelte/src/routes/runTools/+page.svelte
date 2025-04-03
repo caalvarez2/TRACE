@@ -29,7 +29,7 @@ import { goto } from '$app/navigation';
       const data = await res.json();
       console.log('Crawler response:', data);
       if (data.success) {
-        alert('Crawler executed successfully. Check server console for the tree graph.');
+        goto(`/webtree?projectId=1`);
       } else {
         alert('Crawler encountered an error: ' + data.error);
       }
