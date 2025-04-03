@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 from .Crawler import crawl_site  # Ensure this is an async function
 from routers.treestructuremanager import TreeStructureManager
-from .state import tree_data, init_tree_manager
+from .state import tree_data, init_tree_manager, update_tree_data
 import asyncio
 router = APIRouter()
 
@@ -16,17 +16,16 @@ async def run_crawler(url: str = Query(..., description="URL to crawl"), depth: 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Crawling failed: {str(e)}")
     
+    # Get the persistent tree manager instance
     manager = init_tree_manager()
     for record in crawled_data:
         record_url = record.get('url')
         if record_url:
             manager.add_url(record_url)
     
-    # Update the global tree_data
-    from .state import tree_data  # already imported; tree_data can be a mutable variable
-    tree_data.clear()
-    tree_data.extend(manager.get_tree_nodes())
-    return {"success": True, "tree": tree_data}
+    # Update the global tree_data with the latest structure
+    updated_data = update_tree_data()
+    return {"success": True, "tree": updated_data}
 
 # --- HTTP Client Integration for Response Manager ---
 
@@ -73,6 +72,12 @@ class HTTPClient:
         print("  Method:", req_type)
         print("  Headers:", headers)
         print("  Data:", data)
+        
+        # Add URL to tree structure
+        manager = init_tree_manager()
+        manager.add_url(url)
+        update_tree_data()
+        
         # Create the HTTP request.
         request = self.request_manager.create_request(req_type, url, headers, params={}, payload=data)
         # Optionally forward the request.
@@ -136,9 +141,10 @@ async def send_client_request(client_request: ClientRequest):
     print("  Headers:", response.headers)
     print("  Body:", response.body)
     
-    # Return the formatted response.
+    # Return the formatted response with updated tree data
     return {
         "status": response.status_code,
         "headers": response.headers,
-        "body": response.body
+        "body": response.body,
+        "tree": tree_data  # Include the updated tree data in the response
     }
